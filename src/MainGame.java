@@ -1,9 +1,36 @@
-
+import java.io.*;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.random.*;
 
 public class MainGame {
+
+    public static void saveXP(int xp) {
+        try (FileWriter writer = new FileWriter("player_xp.txt")) {
+            writer.write(String.valueOf(xp));
+        } catch (IOException e) {
+            System.out.println("Error saving XP.");
+        }
+    }
+
+    public static int loadXP() {
+        File file = new File("player_xp.txt");
+
+        if (!file.exists()) {
+            return 0;
+        }
+
+        try (Scanner reader = new Scanner(file)) {
+            if (reader.hasNextInt()) {
+                return reader.nextInt();
+            }
+        } catch (Exception e) {
+            System.out.println("Error loading XP.");
+        }
+
+        return 0;
+    }
+
     public static void main(String[] args) {
 
         Scanner userInput = new Scanner(System.in);
@@ -15,7 +42,8 @@ public class MainGame {
         Player Computer = new Player("None");
 
         //-------------------------------------
-        int accumulatedXP = 20;
+        int accumulatedXP = loadXP();
+        System.out.println("Loaded XP: " + accumulatedXP);
 
         while (myPlayer.isAlive()&&Computer.isAlive()){
             System.out.print("Enter your choice(bato, gunting, papel): ");
@@ -41,6 +69,7 @@ public class MainGame {
                     Computer.getDamage();
                     System.out.println("You win! Computer took damage!");
                     System.out.println("Computer life: "+Computer.getLife());
+                    accumulatedXP += 20;
                     myPlayer.setAccumulatedXP(accumulatedXP);
                     System.out.println("Acquired XP: "+ myPlayer.getAccumulatedXP());
 
@@ -58,6 +87,7 @@ public class MainGame {
                     Computer.getDamage();
                     System.out.println("You win! Computer took damage!");
                     System.out.println("Computer life: "+Computer.getLife());
+                    accumulatedXP += 20;
                     myPlayer.setAccumulatedXP(accumulatedXP);
                     System.out.println("Acquired XP: "+ myPlayer.getAccumulatedXP());
                 } else if (userChoice.equalsIgnoreCase(selectedChoice.getName())) {
@@ -74,6 +104,7 @@ public class MainGame {
                     Computer.getDamage();
                     System.out.println("You win! Computer took damage!");
                     System.out.println("Computer life: "+Computer.getLife());
+                    accumulatedXP += 20;
                     myPlayer.setAccumulatedXP(accumulatedXP);
                     System.out.println("Acquired XP: "+ myPlayer.getAccumulatedXP());
                 } else if (userChoice.equalsIgnoreCase(selectedChoice.getName())) {
@@ -121,10 +152,12 @@ public class MainGame {
         if (myPlayer.getLife()>0){
             myPlayer.setXP(myPlayer.getAccumulatedXP());
             System.out.println("You win! Your current XP: "+myPlayer.getXP());
+            saveXP(myPlayer.getXP());
         }else{
             myPlayer.setAccumulatedXP(0);
             System.out.println();
             System.out.println("You Lose! Your current XP: "+myPlayer.getXP());
+            saveXP(0);
         }
 
 
