@@ -1,175 +1,169 @@
-import java.io.*;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.random.*;
+// java
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.RoundRectangle2D;
+import java.io.IOException;
 
-public class MainGame extends Player {
+public class TestPlayWindow {
 
-    public static void saveXP(int xp) {
-        try (FileWriter writer = new FileWriter("player_xp.txt")) {
-            writer.write(String.valueOf(xp));
-        } catch (IOException e) {
-            System.out.println("Error saving XP.");
+    public TestPlayWindow() throws IOException, FontFormatException {
+        JFrame frame = new JFrame("Bato-Bato Pick");
+        Dimension size = new Dimension(768, 630);
+        frame.setSize(size);
+        frame.setLayout(new BorderLayout());
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        Image backgroundImg = new ImageIcon(getClass().getResource("Background.gif")).getImage();
+
+        JPanel backgroundPanel = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(backgroundImg, 0,0,getWidth(),getHeight(),this);
+            }
+        };
+        backgroundPanel.setOpaque(true);
+        backgroundPanel.setLayout(new BorderLayout());
+        backgroundPanel.setBounds(0, 0, size.width, size.height);
+
+        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane.setPreferredSize(size);
+        layeredPane.add(backgroundPanel, Integer.valueOf(0));
+
+        final int arc = 50;
+        JButton startButton = new JButton("Start") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // draw rounded background
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
+                g2.dispose();
+                // let the button draw the text (button is non-opaque so it won't fill its background)
+                super.paintComponent(g);
+            }
+
+            @Override
+            public boolean contains(int x, int y) {
+                Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), arc, arc);
+                return shape.contains(x, y);
+            }
+        };
+
+        startButton.setBounds(290, 430, 200, 50);
+        startButton.setBackground(new Color(241, 109, 124));
+        startButton.setForeground(Color.white);
+        startButton.setFocusPainted(false);
+        startButton.setBorderPainted(false);
+        startButton.setContentAreaFilled(false);
+
+
+        startButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                startButton.setBackground(Color.WHITE);
+                startButton.setForeground(new Color(81, 112, 255));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                startButton.setBackground(new Color(241, 109, 124));
+                startButton.setForeground(Color.white);
+            }
+        });
+
+        JButton UnlocksButton = new JButton("Unlocks"){
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // draw rounded background
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
+                g2.dispose();
+                // let the button draw the text (button is non-opaque so it won't fill its background)
+                super.paintComponent(g);
+            }
+
+            @Override
+            public boolean contains(int x, int y) {
+                Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), arc, arc);
+                return shape.contains(x, y);
+            }
+        };
+        UnlocksButton.setBounds(290, 500, 200, 50);
+        UnlocksButton.setBackground(new Color(246, 205, 90));
+        UnlocksButton.setForeground(new Color(0,0,128));
+        UnlocksButton.setBorderPainted(false);
+        UnlocksButton.setFocusPainted(false);
+        UnlocksButton.setContentAreaFilled(false);
+
+
+        UnlocksButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                UnlocksButton.setBackground(Color.WHITE);
+                UnlocksButton.setForeground(new Color(81, 112, 255));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                UnlocksButton.setBackground(new Color(246, 205, 90));
+                UnlocksButton.setForeground(new Color(0,0,128));
+            }
+        });
+
+        try {
+            // Load font from resources
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT,
+                    getClass().getResourceAsStream("Cubao_Free_Regular.otf") // leading "/" means root of resources
+            );
+
+            // Derive size and style
+            customFont = customFont.deriveFont(Font.BOLD, 30f);
+
+            // Apply to a button or label
+            startButton.setFont(customFont);
+            UnlocksButton.setFont(customFont);
         }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        layeredPane.add(startButton, Integer.valueOf(1));
+        layeredPane.add(UnlocksButton, Integer.valueOf(1));
+
+        frame.add(layeredPane, BorderLayout.CENTER);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
-    public static int loadXP() {
-        File file = new File("player_xp.txt");
+    public static void main(String[] args) throws IOException, FontFormatException, InterruptedException {
 
-        if (!file.exists()) {
-            return 0;
-        }
+        Preloader preloader = new Preloader();
+        preloader.setVisible(true);
 
-        try (Scanner reader = new Scanner(file)) {
-            if (reader.hasNextInt()) {
-                return reader.nextInt();
-            }
-        } catch (Exception e) {
-            System.out.println("Error loading XP.");
-        }
+        Thread.sleep(7900);
 
-        return 0;
+        preloader.setVisible(false);
+
+        new TestPlayWindow();
     }
+}
 
-    Player myPlayer = new Player();
-    Player Computer = new Player();
+class Preloader extends JWindow {
 
-    public static void main(String[] args) {
-
-        Scanner userInput = new Scanner(System.in);
-        GameElement Bato = new GameElement("Bato","Papel", "Gunting");
-        GameElement Gunting = new GameElement("Gunting","Bato", "Papel");
-        GameElement Papel = new GameElement("Papel", "Gunting", "Bato");
-
-
-        MainGame game = new MainGame();
-        Player myPlayer = game.myPlayer;
-        Player Computer = game.Computer;
-
-
-
-        //-------------------------------------
-        int accumulatedXP = loadXP();
-        System.out.println("Loaded XP: " + accumulatedXP);
-
-        while (myPlayer.isAlive()&&Computer.isAlive()){
-            System.out.print("Enter your choice(bato, gunting, papel): ");
-            String userChoice = userInput.nextLine();
-
-            System.out.println();
-            GameElement[] choices = new GameElement[]{Bato, Papel, Gunting};
-            Random computerChoice = new Random();
-            int randomIndex = computerChoice.nextInt(choices.length);
-            GameElement selectedChoice = choices[randomIndex];
-
-            System.out.println("Player chooses: "+userChoice);
-            System.out.println("Computer chooses: "+selectedChoice.getName());
-
-            boolean win;
-
-
-
-            if (userChoice.equalsIgnoreCase("Bato")){
-                win = Bato.isWin(selectedChoice);
-
-                if (win){
-                    Computer.getDamage();
-                    System.out.println("You win! Computer took damage!");
-                    System.out.println("Computer life: "+Computer.getLife());
-                    accumulatedXP += 20;
-                    myPlayer.setAccumulatedXP(accumulatedXP);
-                    System.out.println("Acquired XP: "+ myPlayer.getAccumulatedXP());
-
-                } else if (userChoice.equalsIgnoreCase(selectedChoice.getName())) {
-                    System.out.println("Draw! No one took damage!");
-                }else {
-                    myPlayer.getDamage();
-                    System.out.println("You Lose! You took damage!");
-                    System.out.println("Your life: "+ myPlayer.getLife());
-                }
-            } else if (userChoice.equalsIgnoreCase(("Gunting"))) {
-                win = Gunting.isWin(selectedChoice);
-
-                if (win){
-                    Computer.getDamage();
-                    System.out.println("You win! Computer took damage!");
-                    System.out.println("Computer life: "+Computer.getLife());
-                    accumulatedXP += 20;
-                    myPlayer.setAccumulatedXP(accumulatedXP);
-                    System.out.println("Acquired XP: "+ myPlayer.getAccumulatedXP());
-                } else if (userChoice.equalsIgnoreCase(selectedChoice.getName())) {
-                    System.out.println("Draw! No one took damage!");
-                }else {
-                    myPlayer.getDamage();
-                    System.out.println("You Lose! You took damage!");
-                    System.out.println("Your life: "+ myPlayer.getLife());
-                }
-            } else if (userChoice.equalsIgnoreCase(("Papel"))){
-                win = Papel.isWin(selectedChoice);
-
-                if (win){
-                    Computer.getDamage();
-                    System.out.println("You win! Computer took damage!");
-                    System.out.println("Computer life: "+Computer.getLife());
-                    accumulatedXP += 20;
-                    myPlayer.setAccumulatedXP(accumulatedXP);
-                    System.out.println("Acquired XP: "+ myPlayer.getAccumulatedXP());
-                } else if (userChoice.equalsIgnoreCase(selectedChoice.getName())) {
-                    System.out.println("Draw! No one took damage!");
-                }else {
-                    myPlayer.getDamage();
-                    System.out.println("You Lose! You took damage!");
-                    System.out.println("Your life: "+ myPlayer.getLife());
-                }
-            }
-
-
-            if ((myPlayer.getLife()>1||Computer.getLife()>1)&&(myPlayer.isAlive()&&Computer.isAlive())){
-                System.out.print("Would you like to double your XP for the next round? (yes/no): ");
-                String doubleXPChoice = userInput.nextLine();
-                System.out.println();
-
-                if (doubleXPChoice.equalsIgnoreCase("yes")) {
-                    accumulatedXP*=2;
-                } else if (doubleXPChoice.equalsIgnoreCase("no")) {
-                    continue;
-                } else {
-                    System.out.println("Invalid choice. XP remains the same.");
-                }
-            }else if (myPlayer.getLife()==1||Computer.getLife()==1){
-                System.out.print("Last Round! Double or Nothing round!");
-                accumulatedXP*=2;
-                System.out.println();
-            }else{
-                break;
-            }
-
-
-
-
-
-
-
-
-        }
-
-        //-----------------------------------------------------------
-
-
-        if (myPlayer.getLife()>0){
-            myPlayer.setXP(myPlayer.getAccumulatedXP());
-            System.out.println("You win! Your current XP: "+myPlayer.getXP());
-            saveXP(myPlayer.getXP());
-        }else{
-            myPlayer.setAccumulatedXP(0);
-            System.out.println();
-            System.out.println("You Lose! Your current XP: "+myPlayer.getXP());
-            saveXP(0);
-        }
-
-
-
-
+    public Preloader() {
+        JLabel animation = new JLabel(new ImageIcon(getClass().getResource("ock.gif")));
+        add(animation);
+        pack();
+        setLocationRelativeTo(null);
     }
 
 }
+
+
+
