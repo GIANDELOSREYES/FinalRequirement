@@ -1,3 +1,12 @@
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Scanner;
+
+public class Player {
     private int XP;
     private int accumulatedXP;
     private String booster;
@@ -193,3 +202,7 @@
 
         return 0;
     }
+
+}
+
+
