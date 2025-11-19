@@ -3,7 +3,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.random.*;
 
-public class MainGame {
+public class MainGame extends Player {
 
     public static void saveXP(int xp) {
         try (FileWriter writer = new FileWriter("player_xp.txt")) {
@@ -31,6 +31,9 @@ public class MainGame {
         return 0;
     }
 
+    Player myPlayer = new Player();
+    Player Computer = new Player();
+
     public static void main(String[] args) {
 
         Scanner userInput = new Scanner(System.in);
@@ -38,8 +41,12 @@ public class MainGame {
         GameElement Gunting = new GameElement("Gunting","Bato", "Papel");
         GameElement Papel = new GameElement("Papel", "Gunting", "Bato");
 
-        Player myPlayer = new Player("None");
-        Player Computer = new Player("None");
+
+        MainGame game = new MainGame();
+        Player myPlayer = game.myPlayer;
+        Player Computer = game.Computer;
+
+
 
         //-------------------------------------
         int accumulatedXP = loadXP();
@@ -119,7 +126,7 @@ public class MainGame {
 
             if ((myPlayer.getLife()>1||Computer.getLife()>1)&&(myPlayer.isAlive()&&Computer.isAlive())){
                 System.out.print("Would you like to double your XP for the next round? (yes/no): ");
-                    String doubleXPChoice = userInput.nextLine();
+                String doubleXPChoice = userInput.nextLine();
                 System.out.println();
 
                 if (doubleXPChoice.equalsIgnoreCase("yes")) {
@@ -166,6 +173,3 @@ public class MainGame {
     }
 
 }
-
-
-
