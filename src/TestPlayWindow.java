@@ -1,6 +1,7 @@
-// java
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
 import java.io.IOException;
 
@@ -58,6 +59,21 @@ public class TestPlayWindow {
         startButton.setBorderPainted(false);
         startButton.setContentAreaFilled(false);
 
+
+        startButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                startButton.setBackground(Color.WHITE);
+                startButton.setForeground(new Color(81, 112, 255));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                startButton.setBackground(new Color(241, 109, 124));
+                startButton.setForeground(Color.white);
+            }
+        });
+
         JButton UnlocksButton = new JButton("Unlocks"){
             @Override
             protected void paintComponent(Graphics g) {
@@ -84,6 +100,27 @@ public class TestPlayWindow {
         UnlocksButton.setFocusPainted(false);
         UnlocksButton.setContentAreaFilled(false);
 
+
+        UnlocksButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                UnlocksButton.setBackground(Color.WHITE);
+                UnlocksButton.setForeground(new Color(81, 112, 255));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                UnlocksButton.setBackground(new Color(246, 205, 90));
+                UnlocksButton.setForeground(new Color(0,0,128));
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                frame.setVisible(false);
+                Player player = new Player();
+                player.getUnlocksFrame();
+            }
+        });
 
         try {
             // Load font from resources
@@ -133,6 +170,3 @@ class Preloader extends JWindow {
     }
 
 }
-
-
-
