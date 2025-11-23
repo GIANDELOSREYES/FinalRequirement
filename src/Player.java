@@ -92,7 +92,7 @@ public class Player {
         this.life +=1;
     }
 
-    public void secondLifeBooster(){
+    public void twoLifeBooster(){
         this.life +=2;
     }
 
@@ -133,15 +133,17 @@ public class Player {
     }
 
     public void applyBoosterEffect(){
-        if (Objects.equals(currentBooster, "1UP")){
+        if (Objects.equals(getCurrentBooster(), "1UP")){
             oneLifeBooster();
-        }else if (Objects.equals(currentBooster, "3UP")){
-            secondLifeBooster();
+        }else if (Objects.equals(getCurrentBooster(), "2UP")){
+            oneLifeBooster();
+        } else if (Objects.equals(getCurrentBooster(), "Special")) {
+            twoLifeBooster();
         }
     }
 
 
-    public void getUnlocksFrame() {
+    public void getUnlocksFrame(Player player) {
         JFrame Unlockframe = new JFrame("Player Test");
         Unlockframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Unlockframe.setSize(768, 700);
@@ -165,8 +167,6 @@ public class Player {
 
         Dimension size = new Dimension(768, 700);
         JLayeredPane layer1 = new JLayeredPane();
-        MainGame game = new MainGame();
-        Player player = game.myPlayer;
 
         if(player.getXP()>=200){
             player.unlockOneLifeBooster(player);
@@ -246,7 +246,7 @@ public class Player {
                 ex.printStackTrace();
             }
         }
-        System.out.println("Current Booster [now]:"+player.currentBooster);
+
         equip1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
