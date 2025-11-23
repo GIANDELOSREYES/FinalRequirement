@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -227,8 +228,25 @@ public class Player {
         equip1.setFocusPainted(false);
         equip1.setContentAreaFilled(true);
 
-        System.out.print(player.currentBooster);
 
+
+        File claimFileOfBooster1 = new File("currentbooster.txt");
+        if (claimFileOfBooster1.exists()) {
+            try (Scanner scanner = new Scanner(claimFileOfBooster1)) {
+
+                String line = scanner.hasNextLine() ? scanner.nextLine().trim() : "";
+                if (line.equals("1UP")) {
+                   player.currentBooster = "1UP";
+                } else if (line.equals("2UP")) {
+                    player.currentBooster = "2UP";
+                }else {
+                    player.currentBooster = "None";
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("Current Booster [now]:"+player.currentBooster);
         equip1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -239,12 +257,28 @@ public class Player {
                     equip1.setText("Equip");
                     equip1.setBackground(new Color(72, 108, 223));
                     System.out.println(player.currentBooster);
+
+                    try {
+                        try (FileWriter writer = new FileWriter("currentbooster.txt")) {
+                            writer.write(String.valueOf(player.getCurrentBooster()));
+                        }
+                    } catch (IOException ex) {
+                        System.out.println("Error saving current booster.");
+                    }
                 }else{
                     if (Objects.equals(player.getCurrentBooster(), "None")){
                         player.equipLifeBoosterFor1UP(player);
                         equip1.setText("Equipped");
                         equip1.setBackground(new Color(38, 196, 86));
                         System.out.println(player.currentBooster);
+
+                        try {
+                            try (FileWriter writer = new FileWriter("currentbooster.txt")) {
+                                writer.write(String.valueOf(player.getCurrentBooster()));
+                            }
+                        } catch (IOException ex) {
+                            System.out.println("Error saving current booster.");
+                        }
                     }else{
                         JOptionPane.showMessageDialog(
                                 null,
@@ -254,7 +288,6 @@ public class Player {
                         );
                     }
                 }
-
             }
         });
 
@@ -289,12 +322,28 @@ public class Player {
                     equip3.setText("Equip");
                     equip3.setBackground(new Color(72, 108, 223));
                     System.out.println(player.currentBooster);
+
+                    try {
+                        try (FileWriter writer = new FileWriter("currentbooster.txt")) {
+                            writer.write(String.valueOf(player.getCurrentBooster()));
+                        }
+                    } catch (IOException ex) {
+                        System.out.println("Error saving current booster.");
+                    }
                 }else{
                     if (Objects.equals(player.getCurrentBooster(), "None")) {
                         player.equipLifeBoosterFor2UP(player);
                         equip3.setText("Equipped");
                         equip3.setBackground(new Color(38, 196, 86));
                         System.out.println(player.currentBooster);
+
+                        try {
+                            try (FileWriter writer = new FileWriter("currentbooster.txt")) {
+                                writer.write(String.valueOf(player.getCurrentBooster()));
+                            }
+                        } catch (IOException ex) {
+                            System.out.println("Error saving current booster.");
+                        }
                     }else{
                         JOptionPane.showMessageDialog(
                                 null,
@@ -306,7 +355,46 @@ public class Player {
                 }
 
             }
+
         });
+
+        String whichEquipped = "";
+
+        File claimFileOfBooster = new File("currentbooster.txt");
+        if (claimFileOfBooster.exists()) {
+
+
+            try (Scanner scanner = new Scanner(claimFileOfBooster)) {
+
+                String line = scanner.hasNextLine() ? scanner.nextLine().trim() : "";
+                if (line.equals("1UP")) {
+                    whichEquipped = "1UP";
+                } else if (line.equals("2UP")) {
+                    whichEquipped = "2UP";
+                }else {
+                    whichEquipped = "None";
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("Equipped: "+whichEquipped);
+
+        if(Objects.equals(whichEquipped, "1UP")){
+            equip1.setText("Equipped");
+            equip1.setBackground(new Color(38, 196, 86));
+        } else if (Objects.equals(whichEquipped, "2UP")) {
+            equip3.setText("Equipped");
+            equip3.setBackground(new Color(38, 196, 86));
+        }else {
+            equip3.setText("Equip");
+            equip3.setBackground(new Color(72, 108, 223));
+            equip3.setForeground(Color.white);
+
+            equip1.setText("Equip");
+            equip1.setBackground(new Color(72, 108, 223));
+            equip1.setForeground(Color.white);
+        }
 
 
         JButton locked1UPButton = new JButton("Reach 200XP");
@@ -360,6 +448,40 @@ public class Player {
         BackButton.setFocusPainted(false);
         BackButton.setContentAreaFilled(false);
 
+        ImageIcon XPicon = new ImageIcon(Player.class.getResource("XP.png"));
+        XPicon.setImage(XPicon.getImage().getScaledInstance(20,20, Image.SCALE_SMOOTH));
+
+
+        JButton xpLabel = new JButton("XP: " + player.getXP(), XPicon){
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // draw rounded background
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
+                g2.dispose();
+                // let the button draw the text (button is non-opaque so it won't fill its background)
+                super.paintComponent(g);
+            }
+
+            @Override
+            public boolean contains(int x, int y) {
+                Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 30, 30);
+                return shape.contains(x, y);
+            }
+        };
+        xpLabel.setBackground(Color.WHITE);
+        xpLabel.setBounds(630,10,100,30);
+        xpLabel.setForeground(new Color(81, 112, 255));
+        xpLabel.setBorder(new RoundedBorder(30, new Color(81,112,255), 3));
+        xpLabel.setFocusPainted(false);
+        xpLabel.setContentAreaFilled(false);
+        xpLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        xpLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
+
+
+
+
 
 
         layer1.setPreferredSize(size);
@@ -368,6 +490,7 @@ public class Player {
         layer1.add(unlock2Panel, Integer.valueOf(1));
         layer1.add(unlock3Panel, Integer.valueOf(1));
         layer1.add(BackButton, Integer.valueOf(1));
+        layer1.add(xpLabel, Integer.valueOf(1));
 
         //----------------------------
         if(player.getXP()>=200){
@@ -429,11 +552,12 @@ public class Player {
             equip3.setFont(customFont);
             claim.setFont(customFont);
             BackButton.setFont(customFontLight);
-
         }
         catch (Exception e) {
             e.printStackTrace();
         }
+
+         boolean isClaimed = false;
 
         claim.addMouseListener(new MouseAdapter() {
             @Override
@@ -442,7 +566,21 @@ public class Player {
                 int beforeXP = player.getXP();
                 clicked[0]++;
 
-                if (clicked[0] < 2) {
+                boolean alreadyClaimed = false;
+
+                File claimFile = new File("claim_state.txt");
+                if (claimFile.exists()) {
+                    try (Scanner scanner = new Scanner(claimFile)) {
+                        if (scanner.hasNextLine() && scanner.nextLine().equals("claimed")) {
+                            alreadyClaimed = true;
+
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+
+                if (clicked[0] < 2 && !alreadyClaimed) {
                     player.setXP(500);
                     // Save updated XP to file
                     try (FileWriter writer = new FileWriter("player_xp.txt")) {
@@ -457,6 +595,25 @@ public class Player {
                             "Success",
                             JOptionPane.INFORMATION_MESSAGE
                     );
+
+                    xpLabel.setText("XP: " + player.getXP());
+                    xpLabel.revalidate();
+                    xpLabel.repaint();
+
+                    try (FileWriter writer = new FileWriter("claim_state.txt")) {
+                        writer.write("claimed");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }else{
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "You have already claimed this reward.",
+                            "Error 102",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+
+
                 }
                 claim.setText("Claimed");
                 claim.setBackground(new Color(38, 196, 86));
@@ -468,10 +625,29 @@ public class Player {
                     layer1.remove(locked2UPButton);
                     layer1.add(equip3, Integer.valueOf(1));
                     layer1.revalidate();
-                    layer1.repaint();
+                    layer1.repaint();;
                 }
             }
+
         });
+
+        File claimFile = new File("claim_state.txt");
+        if (claimFile.exists()) {
+            try (Scanner scanner = new Scanner(claimFile)) {
+                if (scanner.hasNextLine() && scanner.nextLine().equals("claimed")) {
+                    isClaimed = true;
+
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        System.out.println(isClaimed);
+        if (isClaimed){
+            claim.setText("Claimed");
+            claim.setBackground(new Color(38, 196, 86));
+        }
 
         BackButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -526,6 +702,39 @@ public class Player {
         }
 
         return 0;
+    }
+
+
+    public class RoundedBorder implements Border {
+
+        private int radius;
+        private Color color;
+        private int thickness;
+
+        public RoundedBorder(int radius, Color color, int thickness) {
+            this.radius = radius;
+            this.color = color;
+            this.thickness = thickness;
+        }
+
+        @Override
+        public Insets getBorderInsets(Component c) {
+            return new Insets(thickness + 2, thickness + 2, thickness + 2, thickness + 2);
+        }
+
+        @Override
+        public boolean isBorderOpaque() {
+            return false;
+        }
+
+        @Override
+        public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(color);
+            g2.setStroke(new BasicStroke(thickness));
+            g2.drawRoundRect(x, y, width - 1, height - 1, radius, radius);
+        }
     }
 
 
