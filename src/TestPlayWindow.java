@@ -118,7 +118,7 @@ public class TestPlayWindow {
             public void mouseClicked(MouseEvent e) {
                 frame.setVisible(false);
                 Player player = new Player();
-                player.getUnlocksFrame();
+                player.getUnlocksFrame(new MainGame().getMyPlayer());
             }
         });
 
@@ -149,12 +149,12 @@ public class TestPlayWindow {
 
     public static void main(String[] args) throws IOException, FontFormatException, InterruptedException {
 
-        //Preloader preloader = new Preloader();
-        //preloader.setVisible(true);
+        Preloader preloader = new Preloader();
+        preloader.setVisible(true);
 
-        //Thread.sleep(7900);
+        Thread.sleep(7900);
 
-        //preloader.setVisible(false);
+        preloader.setVisible(false);
 
         new TestPlayWindow();
     }
