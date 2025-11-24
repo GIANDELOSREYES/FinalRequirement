@@ -1,8 +1,15 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.RoundRectangle2D;
 import java.io.*;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.random.*;
+
+
 
 public class MainGame extends Player {
 
@@ -47,10 +54,368 @@ public class MainGame extends Player {
         GameElement Papel = new GameElement("Papel", "Gunting", "Bato");
 
 
+
+        Dimension size = new Dimension(768, 630);
+        JPanel mainPanel = new JPanel(new CardLayout());
+        JLabel readyLabel = new JLabel(new ImageIcon(MainGame.class.getResource("ReadySetGo.gif")));
+
+        JPanel howToPlayPanel;
+        Image backgroundImgHow = new ImageIcon(MainGame.class.getResource("How.png")).getImage();
+
+
+
+        howToPlayPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(backgroundImgHow, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
+        howToPlayPanel.setOpaque(true);
+        howToPlayPanel.setLayout(new BorderLayout());
+        howToPlayPanel.setBounds(0, 0, size.width, size.height);
+
+        JButton backMenu = new JButton("Back to Menu");
+        backMenu.setBounds(210, 530, 170, 40);
+        backMenu.setBackground(new Color(17, 89, 201));
+        backMenu.setForeground(Color.white);
+        backMenu.setFocusPainted(false);
+        backMenu.setBorderPainted(false);
+        backMenu.setContentAreaFilled(true);
+
+
+        JButton PlayButton = new JButton("Play");
+        PlayButton.setBounds(400, 530, 170, 40);
+        PlayButton.setBackground(new Color(106, 199, 63));
+        PlayButton.setForeground(Color.white);
+        PlayButton.setFocusPainted(false);
+        PlayButton.setBorderPainted(false);
+        PlayButton.setContentAreaFilled(true);
+        try {
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, MainGame.class.getResourceAsStream("Cubao_Free_Regular.otf") // leading "/" means root of resources
+            );
+
+            customFont = customFont.deriveFont(Font.PLAIN, 20f);
+            Font customFont1 = customFont.deriveFont(Font.PLAIN, 25f);
+
+            backMenu.setFont(customFont);
+            PlayButton.setFont(customFont1);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        JLayeredPane backMenuLayered = new TestPlayWindow().getLayeredPane();
+
+        CardLayout cardLayout = (CardLayout) mainPanel.getLayout();
+
+        JFrame frame = new JFrame("Bato-Bato Pick");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        JLayeredPane layeredPaneHow = new JLayeredPane();
+        layeredPaneHow.setPreferredSize(size);
+        layeredPaneHow.add(howToPlayPanel, Integer.valueOf(0));
+        layeredPaneHow.add(backMenu, Integer.valueOf(1));
+        layeredPaneHow.add(PlayButton, Integer.valueOf(1));
+
+        mainPanel.add(readyLabel, "ReadySetGo");
+        mainPanel.add(layeredPaneHow, "HowToPlay");
+        mainPanel.add(backMenuLayered, "MainMenu");
+        cardLayout.show(mainPanel, "HowToPlay");
+
+
+        backMenu.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                cardLayout.next(mainPanel);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                backMenu.setBackground(Color.WHITE);
+                backMenu.setForeground(new Color(81, 112, 255));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                backMenu.setBackground(new Color(17, 89, 201));
+                backMenu.setForeground(Color.white);
+            }
+        });
+
+
+
+        Image backgroundImgChoice = new ImageIcon(MainGame.class.getResource("PlayerChoice.gif")).getImage();
+
+        JPanel backgroundPanelChoice = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(backgroundImgChoice, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
+        backgroundPanelChoice.setOpaque(true);
+        backgroundPanelChoice.setLayout(new BorderLayout());
+        backgroundPanelChoice.setBounds(0, 0, size.width, size.height);
+
+        JLayeredPane layeredPaneChoice = new JLayeredPane();
+        layeredPaneChoice.setPreferredSize(size);
+        layeredPaneChoice.add(backgroundPanelChoice, Integer.valueOf(0));
+
+        mainPanel.add(layeredPaneChoice, "PlayerChoice");
+
+        PlayButton.addMouseListener(new MouseAdapter() {;
+
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                PlayButton.setBackground(Color.WHITE);
+                PlayButton.setForeground(new Color(106, 199, 63));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                PlayButton.setBackground(new Color(106, 199, 63));
+                PlayButton.setForeground(Color.white);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                cardLayout.show(mainPanel, "ReadySetGo");
+
+                Timer showTimer = new Timer(2700, ex -> {
+                    cardLayout.show(mainPanel, "PlayerChoice");
+                });
+
+                showTimer.setRepeats(false);
+                showTimer.start();
+            }
+        });
+
+        final int arc = 50;
+
+        JButton batoButton = new JButton("Rock"){
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
+
+                String text = getText();
+                FontMetrics fm = g2.getFontMetrics();
+                int textWidth = fm.stringWidth(text);
+                int textHeight = fm.getAscent();
+
+                int x = (getWidth() - textWidth) / 2;
+                int y = (getHeight() + textHeight) / 2 - 4;
+
+                g2.setColor(new Color(0, 0, 0, 130));
+                g2.drawString(text, x +1, y + 2);
+
+
+                g2.setColor(getForeground());
+                g2.drawString(text, x, y);
+                g2.dispose();
+
+                super.paintComponent(g);
+            }
+
+            @Override
+            public boolean contains(int x, int y) {
+                Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), arc, arc);
+                return shape.contains(x, y);
+            }};
+        batoButton.setBounds(40, 550, 190, 50);
+        batoButton.setBackground(new Color(255, 215, 0));
+        batoButton.setForeground(Color.white);
+        batoButton.setFocusPainted(false);
+        batoButton.setBorderPainted(false);
+        batoButton.setContentAreaFilled(false);
+
+        JButton papelButton = new JButton("PAPER"){
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
+
+                String text = getText();
+                FontMetrics fm = g2.getFontMetrics();
+                int textWidth = fm.stringWidth(text);
+                int textHeight = fm.getAscent();
+
+                int x = (getWidth() - textWidth) / 2;
+                int y = (getHeight() + textHeight) / 2 - 4;
+
+                g2.setColor(new Color(0, 0, 0, 130));
+                g2.drawString(text, x +1, y + 2);
+
+
+                g2.setColor(getForeground());
+                g2.drawString(text, x, y);
+                g2.dispose();
+
+                super.paintComponent(g);
+            }
+
+            @Override
+            public boolean contains(int x, int y) {
+                Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), arc, arc);
+                return shape.contains(x, y);
+            }};
+        papelButton.setBounds(300, 550, 190, 50);
+        papelButton.setBackground(new Color(38, 196, 86));
+        papelButton.setForeground(Color.white);
+        papelButton.setFocusPainted(false);
+        papelButton.setBorderPainted(false);
+        papelButton.setContentAreaFilled(false);
+
+        JButton guntingButton = new JButton("SCISSORS"){
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), arc, arc);
+
+                String text = getText();
+                FontMetrics fm = g2.getFontMetrics();
+                int textWidth = fm.stringWidth(text);
+                int textHeight = fm.getAscent();
+
+                int x = (getWidth() - textWidth) / 2;
+                int y = (getHeight() + textHeight) / 2 - 4;
+
+                g2.setColor(new Color(0, 0, 0, 130));
+                g2.drawString(text, x +1, y + 2);
+
+
+                g2.setColor(getForeground());
+                g2.drawString(text, x, y);
+                g2.dispose();
+
+                super.paintComponent(g);
+            }
+
+            @Override
+            public boolean contains(int x, int y) {
+                Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), arc, arc);
+                return shape.contains(x, y);
+            }};
+        guntingButton.setBounds(550, 550, 190, 50);
+        guntingButton.setBackground(new Color(81, 112, 255));
+        guntingButton.setForeground(new Color(255, 222, 23));
+        guntingButton.setFocusPainted(false);
+        guntingButton.setBorderPainted(false);
+        guntingButton.setContentAreaFilled(false);
+
+        layeredPaneChoice.add(batoButton, Integer.valueOf(1));
+        layeredPaneChoice.add(papelButton, Integer.valueOf(1));
+        layeredPaneChoice.add(guntingButton, Integer.valueOf(1));
+
+        batoButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                batoButton.setBackground(Color.WHITE);
+                batoButton.setForeground(new Color(255, 215, 0));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                batoButton.setBackground(new Color(255, 215, 0));
+                batoButton.setForeground(Color.white);
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+
+
+            }
+        });
+
+        papelButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                papelButton.setBackground(Color.WHITE);
+                papelButton.setForeground(new Color(38, 196, 86));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                papelButton.setBackground(new Color(38, 196, 86));
+                papelButton.setForeground(Color.white);
+            }
+        });
+
+        guntingButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                guntingButton.setBackground(Color.WHITE);
+                guntingButton.setForeground(new Color(81, 112, 255));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                guntingButton.setBackground(new Color(81, 112, 255));
+                guntingButton.setForeground(new Color(255, 222, 23));
+            }
+        });
+
+
+
+        try {
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, MainGame.class.getResourceAsStream("Cubao_Free_Regular.otf") // leading "/" means root of resources
+            );
+
+            customFont = customFont.deriveFont(Font.PLAIN, 30f);
+
+            batoButton.setFont(customFont);
+            papelButton.setFont(customFont);
+            guntingButton.setFont(customFont);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
+        frame.add(mainPanel);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
+
+
+
+
+
+
+
+
+
+        }
+
+    }
+
+    public void seeOutput(){
+        Scanner userInput = new Scanner(System.in);
+        GameElement Bato = new GameElement("Bato", "Papel", "Gunting");
+        GameElement Gunting = new GameElement("Gunting", "Bato", "Papel");
+        GameElement Papel = new GameElement("Papel", "Gunting", "Bato");
+
+
         MainGame game = new MainGame();
         Player myPlayer = new Player();
         Player Computer = new Player();
-
         File claimFileOfBooster1 = new File("currentbooster.txt");
         if (claimFileOfBooster1.exists()) {
             try (Scanner scanner = new Scanner(claimFileOfBooster1)) {
@@ -72,13 +437,14 @@ public class MainGame extends Player {
         boolean isUsedCom = false;
         int UP2LifeUsed = 2;
 
-
-        //-------------------------------------
-        int accumulatedXP = loadXP();
+        int accumulatedXP = Player.loadXP();
         System.out.println(myPlayer.getCurrentBooster());
         System.out.println("Loaded XP: " + accumulatedXP);
-
         while (myPlayer.isAlive() && Computer.isAlive()) {
+
+
+
+
             System.out.print("Enter your choice(bato, gunting, papel): ");
             String userChoice = userInput.nextLine();
 
@@ -140,7 +506,7 @@ public class MainGame extends Player {
                         }
                     }else if ((myPlayer.getLife() >0 && (UP2LifeUsed>0))&& (Objects.equals(myPlayer.getCurrentBooster(),"2UP"))){
                         System.out.println("Would you like to add life from booster [" +UP2LifeUsed+ "remaining]? (yes/no): ");
-                            String userBoosterChooses = userInput.nextLine();
+                        String userBoosterChooses = userInput.nextLine();
 
                         if (userBoosterChooses.equalsIgnoreCase("yes")) {
                             myPlayer.applyBoosterEffect();
@@ -323,8 +689,6 @@ public class MainGame extends Player {
             }
 
 
-
-        }
 
     }
 }
