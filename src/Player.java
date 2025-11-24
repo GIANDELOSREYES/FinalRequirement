@@ -666,7 +666,7 @@ public class Player {
             public void mouseClicked(MouseEvent e) {
                 Unlockframe.setVisible(false);
                 try {
-                    new TestPlayWindow();
+                    new TestPlayWindow().MainMenu();
                 }catch (IOException ex){
                     ex.printStackTrace();
                 }catch (FontFormatException ex){
