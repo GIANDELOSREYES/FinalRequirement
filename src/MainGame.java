@@ -1,3 +1,5 @@
+import com.sun.jdi.IntegerValue;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -13,42 +15,16 @@ import java.util.random.*;
 
 public class MainGame extends Player {
 
-    public static void saveXP(int xp) {
-        try (FileWriter writer = new FileWriter("player_xp.txt")) {
-            writer.write(String.valueOf(xp));
-        } catch (IOException e) {
-            System.out.println("Error saving XP.");
-        }
-    }
-
-    public static int loadXP() {
-        File file = new File("player_xp.txt");
-
-        if (!file.exists()) {
-            return 0;
-        }
-
-        try (Scanner reader = new Scanner(file)) {
-            if (reader.hasNextInt()) {
-                return reader.nextInt();
-            }
-        } catch (Exception e) {
-            System.out.println("Error loading XP.");
-        }
-
-        return 0;
-    }
 
     Player myPlayer = new Player();
-    Player Computer = new Player();
 
     public Player getMyPlayer() {
         return myPlayer;
     }
 
     public static void main(String[] args) {
-
-        Scanner userInput = new Scanner(System.in);
+        Player myPlayer = new MainGame().getMyPlayer();
+        Player Computer = new Player();
         GameElement Bato = new GameElement("Bato", "Papel", "Gunting");
         GameElement Gunting = new GameElement("Gunting", "Bato", "Papel");
         GameElement Papel = new GameElement("Papel", "Gunting", "Bato");
@@ -165,6 +141,8 @@ public class MainGame extends Player {
         layeredPaneChoice.add(backgroundPanelChoice, Integer.valueOf(0));
 
         mainPanel.add(layeredPaneChoice, "PlayerChoice");
+
+
 
         PlayButton.addMouseListener(new MouseAdapter() {;
 
@@ -320,6 +298,315 @@ public class MainGame extends Player {
         layeredPaneChoice.add(papelButton, Integer.valueOf(1));
         layeredPaneChoice.add(guntingButton, Integer.valueOf(1));
 
+
+        JLabel BatoGunting = new JLabel(new ImageIcon(MainGame.class.getResource("BatoVsGunting.gif")));
+        BatoGunting.setHorizontalAlignment(SwingConstants.CENTER);
+        BatoGunting.setVerticalAlignment(SwingConstants.CENTER);
+
+
+        //JPanel for Bato vs Bato
+
+        Image BatoDraw = new ImageIcon(MainGame.class.getResource("BatoVsBato.gif")).getImage();
+
+        JPanel BatoBato = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(BatoDraw, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
+        //JPanel for Bato vs Papel
+
+        Image BatoLose = new ImageIcon(MainGame.class.getResource("BatoVsPapel.gif")).getImage();
+
+        JPanel BatoPapel = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(BatoLose, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
+
+        //JPanel for Bato Win Render
+
+
+        JLabel BatoWinRender = new JLabel(new ImageIcon(MainGame.class.getResource("BatoVSGuntingRender.gif")));
+        BatoWinRender.setHorizontalAlignment(SwingConstants.CENTER);
+        BatoWinRender.setVerticalAlignment(SwingConstants.CENTER);
+
+
+        //JPanel for Bato Lose Render
+
+        Image BatoLoseRenderImg = new ImageIcon(MainGame.class.getResource("BatoVSPapelRender.gif")).getImage();
+
+
+        JPanel BatoLoseRender = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(BatoLoseRenderImg, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        mainPanel.add(BatoGunting, "BatoisWin");
+        mainPanel.add(BatoBato, "BatoisDraw");
+        mainPanel.add(BatoPapel, "BatoisLose");
+        mainPanel.add(BatoWinRender, "BatoWinRender");
+        mainPanel.add(BatoLoseRender, "BatoLoseRender");
+
+
+        //---------------------------------
+
+        Image winBg = myPlayer.getWithLifebg();
+
+        final JPanel[] WinPanel = {new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(winBg, 0, 0, getWidth(), getHeight(), this);
+            }
+        }};
+        WinPanel[0].setLayout(new BorderLayout());
+        WinPanel[0].setOpaque(true);
+        WinPanel[0].setBounds(0,0,size.width,size.height);
+
+        JLabel XPlabel = new JLabel("Acquired XP: "+myPlayer.getAccumulatedXP());
+        XPlabel.setBounds(270,315, 300,100);
+        XPlabel.setForeground(Color.white);
+
+
+
+        JButton doubleItButton = new JButton("Double It!"){
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // draw rounded background
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
+                g2.dispose();
+                // let the button draw the text (button is non-opaque so it won't fill its background)
+                super.paintComponent(g);
+            }
+
+            @Override
+            public boolean contains(int x, int y) {
+                Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 20, 20);
+                return shape.contains(x, y);
+            }
+        };
+        doubleItButton.setBounds(150, 430, 480, 50);
+        doubleItButton.setForeground(new Color(0,0,128));
+        doubleItButton.setBackground(new Color(246, 205, 90));
+        doubleItButton.setBorderPainted(false);
+        doubleItButton.setFocusPainted(false);
+        doubleItButton.setContentAreaFilled(false);
+
+        try {
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, MainGame.class.getResourceAsStream("Cubao_Free_Regular.otf") // leading "/" means root of resources
+            );
+            customFont = customFont.deriveFont(Font.BOLD, 30f);
+            Font customFontLight = customFont.deriveFont(Font.PLAIN, 25f);
+
+            XPlabel.setFont(customFont);
+            doubleItButton.setFont(customFontLight);
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        doubleItButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                cardLayout.show(mainPanel,"PlayerChoice");
+                int ToAdd = myPlayer.getAccumulatedXP()*2;
+                myPlayer.addAccumulatedXP(ToAdd);
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                doubleItButton.setBackground(Color.WHITE);
+                doubleItButton.setForeground(new Color(106, 199, 63));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                doubleItButton.setForeground(new Color(0,0,128));
+                doubleItButton.setBackground(new Color(246, 205, 90));
+            }
+        });
+
+
+
+
+
+
+        JLayeredPane mainPane = new JLayeredPane();
+        mainPane.setLayout(null);
+        mainPane.setPreferredSize(size);
+        mainPane.add(WinPanel[0], Integer.valueOf(0));
+
+        mainPane.add(XPlabel, Integer.valueOf(1));
+        mainPane.add(doubleItButton, Integer.valueOf(1));
+
+        //Game Over
+
+        Image over = new ImageIcon((MainGame.class.getResource("Over.png"))).getImage();
+        JPanel GameOver = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(over,0,0,getWidth(),getHeight(), this);
+            }
+        };
+        GameOver.setOpaque(true);
+        GameOver.setLayout(new BorderLayout());
+        GameOver.setBounds(0, 0, size.width, size.height);
+
+        JLabel TotalXP = new JLabel("Total XP: "+myPlayer.getXP());
+        TotalXP.setForeground(Color.white);
+        TotalXP.setBounds(290,315, 300,100);
+
+        JButton PlayAgain = new JButton("Play Again?"){
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // draw rounded background
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 50, 50);
+                g2.dispose();
+                // let the button draw the text (button is non-opaque so it won't fill its background)
+                super.paintComponent(g);
+            }
+
+            @Override
+            public boolean contains(int x, int y) {
+                Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 50, 50);
+                return shape.contains(x, y);
+            }
+        };
+        PlayAgain.setForeground(new Color(106, 199, 63));
+        PlayAgain.setBackground(Color.WHITE);
+        PlayAgain.setBounds(150, 420, 230, 60);
+        PlayAgain.setFocusPainted(false);
+        PlayAgain.setBorderPainted(false);
+        PlayAgain.setContentAreaFilled(false);
+
+        JButton ReturnToMenu = new JButton("Return To Menu!"){
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // draw rounded background
+                g2.setColor(getBackground());
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 50, 50);
+                g2.dispose();
+                // let the button draw the text (button is non-opaque so it won't fill its background)
+                super.paintComponent(g);
+            }
+
+            @Override
+            public boolean contains(int x, int y) {
+                Shape shape = new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 50, 50);
+                return shape.contains(x, y);
+            }
+        };
+
+        ReturnToMenu.setForeground(new Color(0,0,128));
+        ReturnToMenu.setBackground(new Color(246, 205, 90));
+        ReturnToMenu.setBounds(400, 420, 240, 60);
+        ReturnToMenu.setFocusPainted(false);
+        ReturnToMenu.setBorderPainted(false);
+        ReturnToMenu.setContentAreaFilled(false);
+
+        try {
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, MainGame.class.getResourceAsStream("Cubao_Free_Regular.otf") // leading "/" means root of resources
+            );
+            customFont = customFont.deriveFont(Font.PLAIN, 30f);
+            Font customFontBolder = customFont.deriveFont(Font.BOLD, 23f);
+
+            TotalXP.setFont(customFont);
+            PlayAgain.setFont(customFontBolder);
+            ReturnToMenu.setFont(customFontBolder);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        PlayAgain.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                myPlayer.setLife(3);
+                Computer.setLife(3);
+
+                int currentAccumulatedXP = myPlayer.getAccumulatedXP();
+                myPlayer.setXP(currentAccumulatedXP);
+                myPlayer.setAccumulatedXP(20);
+
+                myPlayer.setImagewithLife(new ImageIcon(MainGame.class.getResource("bigwin.png")).getImage());
+                cardLayout.show(mainPanel, "PlayerChoice");
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                PlayAgain.setForeground(Color.WHITE);
+                PlayAgain.setBackground(new Color(106, 199, 63));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                PlayAgain.setForeground(new Color(106, 199, 63));
+                PlayAgain.setBackground(Color.WHITE);
+            }
+        });
+
+        ReturnToMenu.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                ReturnToMenu.setBackground(new Color(0,0,128));
+                ReturnToMenu.setForeground(new Color(246, 205, 90));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                ReturnToMenu.setForeground(new Color(0,0,128));
+                ReturnToMenu.setBackground(new Color(246, 205, 90));
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                cardLayout.show(mainPanel,"MainMenu");
+            }
+        });
+
+
+        JLayeredPane layeredPaneForGameOver = new JLayeredPane();
+        layeredPaneForGameOver.setPreferredSize(size);
+
+        layeredPaneForGameOver.add(GameOver, Integer.valueOf(0));
+        layeredPaneForGameOver.add(PlayAgain, Integer.valueOf(1));
+        layeredPaneForGameOver.add(TotalXP, Integer.valueOf(1));
+        layeredPaneForGameOver.add(ReturnToMenu, Integer.valueOf(1));
+        mainPanel.add(layeredPaneForGameOver, "GameOver");
+        mainPanel.add(mainPane, "WinPanel");
+
+        Image drawBg = new ImageIcon(MainGame.class.getResource("draw.png")).getImage();
+
+        JPanel DrawPanel = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(drawBg, 0,0,getWidth(),getHeight(),this);
+            }
+        };
+        DrawPanel.setOpaque(true);
+        DrawPanel.setLayout(new BorderLayout());
+        DrawPanel.setBounds(0, 0, size.width, size.height);
+
+        mainPanel.add(DrawPanel, "drawPanel");
         batoButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
@@ -335,9 +622,95 @@ public class MainGame extends Player {
 
             @Override
             public void mouseClicked(MouseEvent e) {
+                myPlayer.setUserChooses("Bato");
+                GameElement[] choices = new GameElement[]{Bato, Gunting};
+                Random computerChoice = new Random();
+                int randomIndex = computerChoice.nextInt(choices.length);
+                GameElement selectedChoice = choices[randomIndex];
+
+                String userChoice = myPlayer.getUserChooses();
+
+                boolean win;
+                win = Bato.isWin(selectedChoice);
 
 
+                    if (win) {
+                        Computer.getDamage();
+                        XPlabel.setText("Acquired XP: " + myPlayer.getAccumulatedXP());
+                        updateWinBackground(myPlayer, Computer);
+                        cardLayout.show(mainPanel,"BatoisWin");
 
+                        mainPane.remove(WinPanel[0]);
+
+                        Image newWinBg = updateWinBackground(myPlayer, Computer);
+
+                        WinPanel[0] = new JPanel(){
+                            @Override
+                            protected void paintComponent(Graphics g) {
+                                super.paintComponent(g);
+                                g.drawImage(newWinBg, 0,0,getWidth(),getHeight(),this);
+                            }
+                        };
+
+                        WinPanel[0].setLayout(new BorderLayout());
+                        WinPanel[0].setOpaque(true);
+                        WinPanel[0].setBounds(0,0,size.width,size.height);
+
+                        mainPane.add(WinPanel[0], Integer.valueOf(0));
+
+
+                        Timer showTimer = new Timer(7400, ex -> {
+                            cardLayout.show(mainPanel, "BatoWinRender");
+
+                            if(Computer.isAlive()) {
+
+                                Timer showTimer1 = new Timer(4800, exx -> {
+                                    cardLayout.show(mainPanel, "WinPanel");
+                                });
+
+                                showTimer1.setRepeats(false);
+                                showTimer1.start();
+                            }else{
+                                Timer showTimer1 = new Timer(4800, exx -> {
+                                    cardLayout.show(mainPanel, "GameOver");
+                                });
+
+                                showTimer1.setRepeats(false);
+                                showTimer1.start();
+                            }
+
+                        });
+
+                        showTimer.setRepeats(false);
+                        showTimer.start();
+
+
+                    } else if (userChoice.equalsIgnoreCase(selectedChoice.getName())) {
+                        cardLayout.show(mainPanel, "BatoisDraw");
+                        Timer showTimer = new Timer(7400, ex -> {
+                            cardLayout.show(mainPanel,"drawPanel");
+
+                            Timer showTimer1 = new Timer(3000, exx -> {
+                                cardLayout.show(mainPanel, "PlayerChoice");
+                            });
+
+                            showTimer1.setRepeats(false);
+                            showTimer1.start();
+                        });
+
+                        showTimer.setRepeats(false);
+                        showTimer.start();
+
+                }else {
+                    cardLayout.show(mainPanel,"BatoisLose");
+
+                    Timer showTimer = new Timer(8000, ex -> {
+                        cardLayout.show(mainPanel, "BatoLoseRender");
+                    });
+
+                    showTimer.setRepeats(false);
+                    showTimer.start();
+                }
             }
         });
 
@@ -393,29 +766,46 @@ public class MainGame extends Player {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-
-
-
-
-
-
-
-
-
         }
 
-    }
+        public static Image updateWinBackground(Player myPlayer, Player Computer){
 
-    public void seeOutput(){
-        Scanner userInput = new Scanner(System.in);
+        Image newImage = null;
+
+            if(myPlayer.getLife()==3 && Computer.getLife()==2){
+                newImage = new ImageIcon(MainApp.class.getResource("bigwin.png")).getImage();
+            } else if (myPlayer.getLife()==3 && Computer.getLife()==1){
+                 newImage = new ImageIcon(MainApp.class.getResource("3-1WIN.png")).getImage();
+            } else if (myPlayer.getLife()==2 && Computer.getLife()==2) {
+                 newImage = new ImageIcon(MainApp.class.getResource("2-2WIN.png")).getImage();
+
+            }else if (myPlayer.getLife()==2 && Computer.getLife()==1) {
+                newImage = new ImageIcon(MainApp.class.getResource("2-1WIN.png")).getImage();
+            }else if (myPlayer.getLife()==1 && Computer.getLife()==2) {
+                newImage = new ImageIcon(MainApp.class.getResource("1-2WIN.png")).getImage();
+            }else if (myPlayer.getLife()==1 && Computer.getLife()==1) {
+                 newImage = new ImageIcon(MainApp.class.getResource("1-1WIN.png")).getImage();
+            }
+
+
+            if (newImage!=null){
+                myPlayer.setImagewithLife(newImage);
+            }
+            return  newImage;
+        }
+
+}
+
+
+class MainApp extends Player {
+
+    public void demo(Player myPlayer){
         GameElement Bato = new GameElement("Bato", "Papel", "Gunting");
         GameElement Gunting = new GameElement("Gunting", "Bato", "Papel");
         GameElement Papel = new GameElement("Papel", "Gunting", "Bato");
 
-
-        MainGame game = new MainGame();
-        Player myPlayer = new Player();
         Player Computer = new Player();
+
         File claimFileOfBooster1 = new File("currentbooster.txt");
         if (claimFileOfBooster1.exists()) {
             try (Scanner scanner = new Scanner(claimFileOfBooster1)) {
@@ -432,32 +822,71 @@ public class MainGame extends Player {
                 ex.printStackTrace();
             }
         }
+        //mainPanel
+        JPanel mainPanel = new JPanel(new CardLayout());
 
-        boolean isUsed = false;
-        boolean isUsedCom = false;
-        int UP2LifeUsed = 2;
+        //cardlayout
+
+        CardLayout cardLayout = (CardLayout) mainPanel.getLayout();
+
+
+
+        //JPanel for Bato vs Gunting
+        Image BatoWin = new ImageIcon(MainApp.class.getResource("BatoVsGunting.gif")).getImage();
+
+        JPanel BatoGunting = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(BatoWin, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        //JPanel for Bato vs Bato
+
+        Image BatoDraw = new ImageIcon(MainApp.class.getResource("BatoVsBato.gif")).getImage();
+
+        JPanel BatoBato = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(BatoDraw, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
+        //JPanel for Bato vs Papel
+
+        Image BatoLose = new ImageIcon(MainApp.class.getResource("BatoVsPapel.gif")).getImage();
+
+        JPanel BatoPapel = new JPanel(){
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(BatoLose, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
+        mainPanel.add(BatoGunting, "BatoisWin");
+        mainPanel.add(BatoBato, "BatoisDraw");
+        mainPanel.add(BatoPapel, "BatoisLose");
+
+
 
         int accumulatedXP = Player.loadXP();
-        System.out.println(myPlayer.getCurrentBooster());
-        System.out.println("Loaded XP: " + accumulatedXP);
+        Scanner userInput = new Scanner(System.in);
+
         while (myPlayer.isAlive() && Computer.isAlive()) {
-
-
-
-
-            System.out.print("Enter your choice(bato, gunting, papel): ");
-            String userChoice = userInput.nextLine();
-
-            System.out.println();
             GameElement[] choices = new GameElement[]{Bato, Papel, Gunting};
             Random computerChoice = new Random();
             int randomIndex = computerChoice.nextInt(choices.length);
             GameElement selectedChoice = choices[randomIndex];
 
-            System.out.println("Player chooses: " + userChoice);
-            System.out.println("Computer chooses: " + selectedChoice.getName());
-
             boolean win;
+
+            boolean isUsed = false;
+            boolean isUsedCom = false;
+            int UP2LifeUsed = 2;
+
+            String userChoice = myPlayer.getUserChooses();
 
 
             if (userChoice.equalsIgnoreCase("Bato")) {
@@ -465,14 +894,12 @@ public class MainGame extends Player {
 
                 if (win) {
                     Computer.getDamage();
-                    System.out.println("You win! Computer took damage!");
-                    System.out.println("Computer life: " + Computer.getLife());
+                    cardLayout.show(mainPanel,"BatoisWin");
                     accumulatedXP += 20;
                     myPlayer.setAccumulatedXP(accumulatedXP);
-                    System.out.println("Acquired XP: " + myPlayer.getAccumulatedXP());
 
-                    if ((Computer.getLife() == 1 && !isUsedCom)&&(!Objects.equals(myPlayer.getCurrentBooster(), "None"))) {
-                        if (Objects.equals(myPlayer.getCurrentBooster(), "1UP")){
+                    if ((Computer.getLife() == 1 && !isUsedCom) && (!Objects.equals(myPlayer.getCurrentBooster(), "None"))) {
+                        if (Objects.equals(myPlayer.getCurrentBooster(), "1UP")) {
                             Computer.setCurrentBooster(myPlayer.getCurrentBooster());
                             Computer.applyBoosterEffect();
                             System.out.println("Computer used a life booster! Computer's current life: " + Computer.getLife());
@@ -485,13 +912,11 @@ public class MainGame extends Player {
                         }
                     }
                 } else if (userChoice.equalsIgnoreCase(selectedChoice.getName())) {
-                    System.out.println("Draw! No one took damage!");
+                    cardLayout.show(mainPanel,"BatoisDraw");
                 } else {
                     myPlayer.getDamage();
-                    System.out.println("You Lose! You took damage!");
-                    System.out.println("Your life: " + myPlayer.getLife());
-
-                    if ((myPlayer.getLife() > 0 && !isUsed)&& (Objects.equals(myPlayer.getCurrentBooster(),"1UP"))) {
+                    cardLayout.show(mainPanel,"BatoisLose");
+                    if ((myPlayer.getLife() > 0 && !isUsed) && (Objects.equals(myPlayer.getCurrentBooster(), "1UP"))) {
                         System.out.println("Would you like to use your life booster " + myPlayer.getCurrentBooster() + "? (yes/no): ");
                         String userBoosterChooses = userInput.nextLine();
 
@@ -504,8 +929,8 @@ public class MainGame extends Player {
                         } else {
                             System.out.println("Invalid choice. No booster used.");
                         }
-                    }else if ((myPlayer.getLife() >0 && (UP2LifeUsed>0))&& (Objects.equals(myPlayer.getCurrentBooster(),"2UP"))){
-                        System.out.println("Would you like to add life from booster [" +UP2LifeUsed+ "remaining]? (yes/no): ");
+                    } else if ((myPlayer.getLife() > 0 && (UP2LifeUsed > 0)) && (Objects.equals(myPlayer.getCurrentBooster(), "2UP"))) {
+                        System.out.println("Would you like to add life from booster [" + UP2LifeUsed + "remaining]? (yes/no): ");
                         String userBoosterChooses = userInput.nextLine();
 
                         if (userBoosterChooses.equalsIgnoreCase("yes")) {
@@ -520,175 +945,18 @@ public class MainGame extends Player {
                         }
                     }
                 }
-            } else if (userChoice.equalsIgnoreCase(("Gunting"))) {
-                win = Gunting.isWin(selectedChoice);
-
-                if (win) {
-                    Computer.getDamage();
-                    System.out.println("You win! Computer took damage!");
-                    System.out.println("Computer life: " + Computer.getLife());
-                    accumulatedXP += 20;
-                    myPlayer.setAccumulatedXP(accumulatedXP);
-                    System.out.println("Acquired XP: " + myPlayer.getAccumulatedXP());
-
-                    if ((Computer.getLife() == 1 && !isUsedCom)&&(!Objects.equals(myPlayer.getCurrentBooster(), "None"))) {
-                        if (Objects.equals(myPlayer.getCurrentBooster(), "1UP")){
-                            Computer.setCurrentBooster(myPlayer.getCurrentBooster());
-                            Computer.applyBoosterEffect();
-                            System.out.println("Computer used a life booster! Computer's current life: " + Computer.getLife());
-                            isUsedCom = true;
-                        } else if (Objects.equals(myPlayer.getCurrentBooster(), "2UP")) {
-                            Computer.setCurrentBooster("Special");
-                            Computer.applyBoosterEffect();
-                            System.out.println("Computer used a life booster! Computer's current life: " + Computer.getLife());
-                            isUsedCom = true;
-                        }
-                    }
-                } else if (userChoice.equalsIgnoreCase(selectedChoice.getName())) {
-                    System.out.println("Draw! No one took damage!");
-                } else {
-                    myPlayer.getDamage();
-                    System.out.println("You Lose! You took damage!");
-                    System.out.println("Your life: " + myPlayer.getLife());
-
-                    if ((myPlayer.getLife() > 0 && !isUsed)&& (Objects.equals(myPlayer.getCurrentBooster(),"1UP"))) {
-                        System.out.println("Would you like to use your life booster " + myPlayer.getCurrentBooster() + "? (yes/no): ");
-                        String userBoosterChooses = userInput.nextLine();
-
-                        if (userBoosterChooses.equalsIgnoreCase("yes")) {
-                            myPlayer.applyBoosterEffect();
-                            isUsed = true;
-                            System.out.println("You used a life booster! Your current life: " + myPlayer.getLife());
-                        } else if (userBoosterChooses.equalsIgnoreCase("no")) {
-                            System.out.println("You chose not to use a life booster.");
-                        } else {
-                            System.out.println("Invalid choice. No booster used.");
-                        }
-                    }else if ((myPlayer.getLife() >0 && (UP2LifeUsed>0))&& (Objects.equals(myPlayer.getCurrentBooster(),"2UP"))){
-                        System.out.println("Would you like to add life from booster [" +UP2LifeUsed+ "remaining]? (yes/no): ");
-                        String userBoosterChooses = userInput.nextLine();
-
-                        if (userBoosterChooses.equalsIgnoreCase("yes")) {
-                            myPlayer.applyBoosterEffect();
-                            isUsed = true;
-                            System.out.println("You used a life booster! Your current life: " + myPlayer.getLife());
-                            UP2LifeUsed--;
-                        } else if (userBoosterChooses.equalsIgnoreCase("no")) {
-                            System.out.println("You chose not to use a life booster.");
-                        } else {
-                            System.out.println("Invalid choice. No booster used.");
-                        }
-                    }
-                }
-            } else if (userChoice.equalsIgnoreCase(("Papel"))) {
-                win = Papel.isWin(selectedChoice);
-
-                if (win) {
-                    Computer.getDamage();
-                    System.out.println("You win! Computer took damage!");
-                    System.out.println("Computer life: " + Computer.getLife());
-                    accumulatedXP += 20;
-                    myPlayer.setAccumulatedXP(accumulatedXP);
-                    System.out.println("Acquired XP: " + myPlayer.getAccumulatedXP());
-
-                    if ((Computer.getLife() == 1 && !isUsedCom)&&(!Objects.equals(myPlayer.getCurrentBooster(), "None"))) {
-                        if (Objects.equals(myPlayer.getCurrentBooster(), "1UP")){
-                            Computer.setCurrentBooster(myPlayer.getCurrentBooster());
-                            Computer.applyBoosterEffect();
-                            System.out.println("Computer used a life booster! Computer's current life: " + Computer.getLife());
-                            isUsedCom = true;
-                        } else if (Objects.equals(myPlayer.getCurrentBooster(), "2UP")) {
-                            Computer.setCurrentBooster("Special");
-                            Computer.applyBoosterEffect();
-                            System.out.println("Computer used a life booster! Computer's current life: " + Computer.getLife());
-                            isUsedCom = true;
-                        }
-                    }
-                } else if (userChoice.equalsIgnoreCase(selectedChoice.getName())) {
-                    System.out.println("Draw! No one took damage!");
-                } else {
-                    myPlayer.getDamage();
-                    System.out.println("You Lose! You took damage!");
-                    System.out.println("Your life: " + myPlayer.getLife());
-
-                    if ((myPlayer.getLife() > 0 && !isUsed)&& (Objects.equals(myPlayer.getCurrentBooster(),"1UP"))) {
-                        System.out.println("Would you like to use your life booster " + myPlayer.getCurrentBooster() + "? (yes/no): ");
-                        String userBoosterChooses = userInput.nextLine();
-
-                        if (userBoosterChooses.equalsIgnoreCase("yes")) {
-                            myPlayer.applyBoosterEffect();
-                            isUsed = true;
-                            System.out.println("You used a life booster! Your current life: " + myPlayer.getLife());
-                        } else if (userBoosterChooses.equalsIgnoreCase("no")) {
-                            System.out.println("You chose not to use a life booster.");
-                        } else {
-                            System.out.println("Invalid choice. No booster used.");
-                        }
-                    }else if ((myPlayer.getLife() >0 && (UP2LifeUsed>0))&& (Objects.equals(myPlayer.getCurrentBooster(),"2UP"))){
-                        System.out.println("Would you like to add life from booster [" +UP2LifeUsed+ "remaining]? (yes/no): ");
-                        String userBoosterChooses = userInput.nextLine();
-
-                        if (userBoosterChooses.equalsIgnoreCase("yes")) {
-                            myPlayer.applyBoosterEffect();
-                            isUsed = true;
-                            System.out.println("You used a life booster! Your current life: " + myPlayer.getLife());
-                            UP2LifeUsed--;
-                        } else if (userBoosterChooses.equalsIgnoreCase("no")) {
-                            System.out.println("You chose not to use a life booster.");
-                        } else {
-                            System.out.println("Invalid choice. No booster used.");
-                        }
-                    }
-                }
-            }
-
-            if ((myPlayer.getLife() > 1 || Computer.getLife() > 1) && (myPlayer.isAlive() && Computer.isAlive())) {
-                System.out.print("Would you like to double your XP for the next round? (yes/no): ");
-                String doubleXPChoice = userInput.nextLine();
-                System.out.println();
-
-                if (doubleXPChoice.equalsIgnoreCase("yes")) {
-                    accumulatedXP *= 2;
-                } else if (doubleXPChoice.equalsIgnoreCase("no")) {
-                    continue;
-                } else {
-                    System.out.println("Invalid choice. XP remains the same.");
-                }
-            } else if (myPlayer.getLife() == 1 && Computer.getLife() == 1) {
-                System.out.print("Last Round! Double or Nothing round!");
-                accumulatedXP *= 2;
-                System.out.println();
-            } else {
-                break;
-            }
-
         }
+
+    }
+
+
+
 
 
         //-----------------------------------------------------------
 
 
-        if (myPlayer.getLife()>0){
-            myPlayer.setXP(myPlayer.getAccumulatedXP());
-            System.out.println("You win! Your current XP: "+myPlayer.getXP());
-            saveXP(myPlayer.getXP());
-        }else{
-            myPlayer.setAccumulatedXP(0);
-            myPlayer.setXP(0);
-            myPlayer.setCurrentBooster("None");
-            System.out.println();
-            System.out.println("You Lose! Your current XP: "+0);
-            saveXP(0);
-
-            try {
-                try (FileWriter writer = new FileWriter("currentbooster.txt")) {
-                    writer.write(String.valueOf(myPlayer.getCurrentBooster()));
-                }
-            } catch (IOException ex) {
-                System.out.println("Error saving current booster.");
-            }
 
 
-
+        }
     }
-}
