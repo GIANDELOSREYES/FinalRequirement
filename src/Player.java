@@ -20,19 +20,37 @@ public class Player {
     private Image booster3IMG;
     private int life;
     private String currentBooster;
-
+    private String userChooses;
+    private Image withLifebg;
 
 
 
     public Player(){
         this.XP = loadXP();
-        this.accumulatedXP = 0;
+        this.accumulatedXP = 20;
         this.booster = booster;
         this.life=3;
         this.booster1IMG = new ImageIcon(getClass().getResource("1UP.png")).getImage();
         this.XP2IMG = new ImageIcon(getClass().getResource("2UP.png")).getImage();
         this.booster3IMG = new ImageIcon(getClass().getResource("3UP.png")).getImage();
         this.currentBooster = "None";
+        this.withLifebg = new ImageIcon(getClass().getResource("bigwin.png")).getImage();
+
+    }
+
+    public Image getWithLifebg() {
+        return withLifebg;
+    }
+     public void setImagewithLife(Image image){
+        this.withLifebg = image;
+     }
+
+    public void setUserChooses(String chooses){
+        userChooses = chooses;
+    }
+
+    public String getUserChooses() {
+        return userChooses;
     }
 
     public int getAccumulatedXP() {
@@ -40,7 +58,11 @@ public class Player {
     }
 
     public void setAccumulatedXP(int accumulatedXP) {
-        this.accumulatedXP +=accumulatedXP;
+        this.accumulatedXP =accumulatedXP;
+    }
+
+    public void addAccumulatedXP(int xpToAdd) {
+        this.accumulatedXP += xpToAdd;
     }
 
     public void setXP(int accumulatedXP){
@@ -49,6 +71,10 @@ public class Player {
 
     public int getXP() {
         return XP;
+    }
+
+    public void setLife(int life) {
+        this.life = life;
     }
 
     public int getLife() {
